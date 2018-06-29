@@ -31,14 +31,15 @@ class Root extends Component {
   }
 
   _animate() {
-    this.setState({time: Date.now() / 2000});
+    this.setState({time: Date.now()});
     window.requestAnimationFrame(this._animate);
   }
 
-  render() {
-    const time = this.state.time % 0.9;
+  _renderLayers() {
+    const time = (this.state.time / 2000) % 0.5;
+    const filterRange = [time, time + 0.5];
 
-    const layers = [
+    return [
       new ScatterplotLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
@@ -48,19 +49,21 @@ class Root extends Component {
         getPosition: d => d,
         getColor: d => [0, 180, 255],
         getRadius: d => 8,
-        getFilterValue: d => (d[0] * d[0] + d[1] * d[1]) / 1e8,
+        getFilterValue: d => Math.sqrt(d[0] * d[0] + d[1] * d[1]) / 1e4,
 
         // Filter
-        filterRange: [time, time + 0.1]
+        filterRange
       })
     ];
+  }
 
+  render() {
     return (
       <div>
         <DeckGL
           controller={true}
           initialViewState={INITIAL_VIEW_STATE}
-          layers={layers}
+          layers={this._renderLayers()}
         >
           <StaticMap
             mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
